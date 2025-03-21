@@ -1,0 +1,398 @@
+\documentclass{beamer}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+
+
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{default}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{serif}    % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+
+\usepackage[english]{babel}
+\usepackage{tikz}
+%\usetikzlibrary{shadows}
+\usepackage[utf8x]{inputenc}
+\usepackage{tikz-cd}
+\usetikzlibrary{quotes,angles}
+
+\title{An Analysis of Soccer Wins Based on Two Variables in the 2008-2016 seasons}
+%\title{An introduction to ideal numbers and algebraic number theory}
+\author{Thomas Xiao}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Uncomment these lines for an automatically generated outline.
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+\section{Background}
+
+\begin{frame}{Data Set Modeled with CDPF}
+
+{\small The data set used in this analysis is the \href{https://www.kaggle.com/datasets/hugomathien/soccer/data}{\textcolor{blue}{European Soccer Database}} by Hugo Mathien, which is an extensive resource for soccer data analysis and machine learning. It includes information on more than 25,000 matches and over 10,000 players from 11 European countries, covering the seasons from 2008 to 2016. More specifically, in each match it includes detailed events such as goals, possession, corners, crosses, fouls, and red and yellow card frequencies. However, this analysis will only focus on two match details, which are the number of goals scored and the number of shots aimed towards the goal of every team, by using the CDPF, or the Cobb-Douglas production function, wich is an economic model that estimates US total production. This analysis will use the CDPF and extend it into soccer by using the data set. Unfortunately, due to the size of the csv file, I am unable to directly put a table into this editing software. However, I have the download to the file \href{https://drive.google.com/file/d/1qR0EhiREtKJtqJxudG6kPd1KwSeLwh9-/view?usp=sharing}{\textcolor{blue}{here}}, where you can open it on Excel locally by selecting "Download" on the file preview page.}
+\end{frame}
+\begin{frame}{Data Set cont.}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{first.png}
+    \caption{The first few rows of the data set opened in Excel}
+    \label{fig:1}
+\end{figure}
+\end{frame}
+\begin{frame}{Data Set cont.}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{1730.png}
+    \caption{Data set row 1730, as that is where the script starts observing based on lack of data from rows 1-1729}
+    \label{fig:2}
+\end{figure}
+\end{frame}
+\begin{frame}{Writing the CDPF in another form: Exercise 81a}
+The logarithmic transformation of the CDPF is done to linearize the multiplicative relationship into an additive one, which simplifies analysis:
+
+\begin{itemize}
+    \item Start with \(P = bL^\alpha K^{1-\alpha}\).
+    \item Take the natural logarithm of both sides: \(\ln P = \ln(bL^\alpha K^{1-\alpha})\).
+    \item Use properties of logarithms: \(\ln(ab) = \ln a + \ln b\).
+    \item Split the logarithms: \(\ln P = \ln b + \ln L^\alpha + \ln K^{1-\alpha}\).
+    \item Apply the power rule for logarithms: \(\ln a^b = b \ln a\).
+    \item Combine and rearrange terms: \(\ln \frac{P}{K} = \ln b + \alpha \ln \frac{L}{K}\).
+\end{itemize}
+
+This transformation allows us to use linear regression techniques to estimate \(\alpha\) and \(\ln b\).
+\end{frame}
+\begin{frame}{Exercise 81a cont.}
+By taking logarithms, the CDPF function $P=bL^\alpha K^{1-\alpha}$ can be expressed as $\ln \frac{P}{K} = \ln b+\alpha \ln \frac{L}{K}$
+\begin{align*}
+P &= bL^\alpha K^{1-\alpha} \\
+\ln P &= \ln(bL^\alpha K^{1-\alpha}) \\
+\ln P &= \ln b + \ln L^\alpha + \ln K^{1-\alpha}\\
+\ln P &= \ln b + \alpha \ln L + (1-\alpha)\ln K \\
+\ln P &= \ln b + \alpha \ln L + \ln K - \alpha \ln K \\
+\ln P - \ln K &= \ln b + \alpha (\ln L - \ln K)\\
+\ln \frac{P}{K} &= \ln b + \alpha \ln \frac{L}{K}
+\end{align*}
+\end{frame}
+
+
+\begin{frame}{\small Consolidating Data and using Exercise 81a to Find $\alpha$ and b}
+
+{\large The CDPF written in another form tells us that $y = \ln b + \alpha x$ where $y = \ln \frac{P}{K}$ and $x = \ln \frac{L}{K}$. $P$ is defined as a team's total wins every year, $L$ as total goals scored every year, and $K$ as the number of shots on goal. All of these variables are collected from 2008-2016. The python script that consolidated the data into these numbers is linked \href{https://drive.google.com/file/d/1BjxFgb9u69afD8BNkvJ2_VB7vQIef37t/view?usp=sharing}{\textcolor{blue}{here}}.} The script works by finding each team's $P$, $L$, and $K$ values summed together each year from the dataset and solving for each point $(\ln \frac{L}{K}, \ln \frac{P}{K})$, plotting them and then finding the least squares regression line through those points. 
+\end{frame}
+\begin{frame}{Finding $\alpha$ and b cont.}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.28]{script2.png}
+    \caption{The first few lines of the script}
+    \label{fig:3}
+\end{figure}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+Here is a demonstration using the first five teams and their $P$, $L$, $K$ values. 
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{points.png}
+    \caption{The first five teams outputted with their $P$, $L$, and $K$ values in order from left to right}
+    \label{fig:4}
+\end{figure}
+$P_1$: $(\ln \frac{L}{K}, \ln \frac{P}{K})$ = $(\ln \frac{7}{42}, \ln \frac{3}{42}) \approx (-1.7918, -2.6391)$
+
+ 
+
+$P_2$: $(\ln \frac{L}{K}, \ln \frac{P}{K})$ = $(\ln \frac{20}{78}, \ln \frac{5}{78}) \approx (-1.361, -2.7473)$
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+$P_3$: $(\ln \frac{L}{K}, \ln \frac{P}{K})$ = $(\ln \frac{8}{70}, \ln \frac{1}{70}) \approx (-2.1691, -4.2485)$
+
+ 
+
+$P_4$: $(\ln \frac{L}{K}, \ln \frac{P}{K})$ = $(\ln \frac{2}{25}, \ln \frac{1}{25}) \approx (-2.5257, -3.2189)$
+
+ 
+
+$P_5$: $(\ln \frac{L}{K}, \ln \frac{P}{K})$ = $(\ln \frac{45}{194}, \ln \frac{16}{194}) \approx (-1.4612, -2.4953)$
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.38]{table.png}
+    \caption{Script calculated values for each point, which match up with $P_1$ to $P_5$; full data can be found \href{https://drive.google.com/file/d/1GXgw2MlP6Wi1fDFdYpyCqSfD1DwbbMSn/view?usp=sharing}{\textcolor{blue}{here.}}}
+    \label{fig:5}
+\end{figure}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+The least squares regression line is given by the equation $y = mx + c$, where $x$ and $y$ are independant from the CDPF; using $x$ and $y$ here is just for convenience when graphing the line later on. $m$ is given by $\frac{n \sum (x_i y_i) - \sum x_i \sum y_i}{n \sum x_i^2 - (\sum x_i)^2}$ where $n$ is the number of data points and each ($x_i, y_i$) is a point. In the context of this example, each ($x_i, y_i$) is a point calculated earlier; $(x_1, y_1)$ is $P_1$, $(x_2, y_2)$ is $P_2$, and so on until $P_5$. $c$ is given by $\frac{\sum y_i - m \sum x_i}{n}$. 
+\end{frame}
+\begin{frame}{Finding \(\alpha\) and \(b\) cont.}
+To find \(\alpha\) and \(b\), we use linear regression on the transformed data:
+
+\begin{itemize}
+    \item \(x = \ln \frac{L}{K}\) and \(y = \ln \frac{P}{K}\).
+    \item The least squares regression line is \(y = mx + c\), where \(m\) is the slope and \(c\) is the intercept.
+    \item Calculate the slope \(m\):
+    \[
+    m = \frac{n \sum (x_i y_i) - \sum x_i \sum y_i}{n \sum x_i^2 - (\sum x_i)^2}
+    \]
+    \item Calculate the intercept \(c\):
+    \[
+    c = \frac{\sum y_i - m \sum x_i}{n}
+    \]
+    \item Identify \(\alpha\) as the slope \(m\) and \(\ln b\) as the intercept \(c\).
+    \item Exponentiate \(c\) to find \(b\): \(b = e^c\).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+Using all five points, we can solve for each value. 
+\begin{align*}
+m &= \frac{n \sum (x_i y_i) - \sum x_i \sum y_i}{n \sum x_i^2 - (\sum x_i)^2} \\ 
+n &= 5 \\
+(x_i, y_i) &= P_i\\
+\sum (x_i y_i) &= (-1.7918)(-2.6391) + \\
+&\quad (-1.361)(-2.7473) + \\
+&\quad (-2.1691)(-4.2485) + \\
+&\quad (-2.5257)(-3.2189) + \\
+&\quad (-1.4612)(-2.4953) \\
+\sum (x_i y_i) &\approx 4.7350 + 3.7443 + 9.2070 + 8.1327 + 3.6447 \\
+\sum (x_i y_i) &\approx 29.4637
+\end{align*}
+
+\end{frame}
+
+% \begin{figure}
+%     \centering
+%     \begin{tikzpicture}
+%         \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[scale=0.35]{ppl.png}};
+%         \begin{scope}[x={(image.south east)},y={(image.north west)}]
+%             % Add labels
+%             \node at (0.5, -0.05) {X-axis};
+%             \node at (-0.05, 0.5) [rotate=90] {Y-axis};
+%         \end{scope}
+%     \end{tikzpicture}
+%     \caption{The result of the system comes out as (7.969, 7.969)}
+%     \label{fig:3}
+% \end{figure}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+\begin{align*}
+\sum x_i \sum y_i &= (-1.7918 - 1.361 - 2.1691 - 2.5257 - 1.4612) \\
+&\quad (-2.6391 - 2.7473 - 4.2485 - 3.2189 - 2.4953) \\
+\sum x_i \sum y_i &= (-9.3096)(-15.3481) \\
+\sum x_i \sum y_i &\approx 142.4604
+\end{align*}
+{\footnotesize
+\begin{align*}
+\sum x_i^2 &= {(-1.7918)^2 + (-1.361)^2 + (-2.1691)^2 + (-2.5257)^2 + (-1.4612)^2} \\
+\sum x_i^2 &\approx 18.2821
+\end{align*}}
+\begin{align*}
+(\sum x_i)^2 &= (-1.7918 - 1.361 - 2.1691 -  2.5257 - 1.4612)^2 \\
+(\sum x_i)^2 &\approx 86.6538
+\end{align*}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+\begin{align*}
+m &= \frac{5(29.4637) - 142.4604}{5(18.2821) - 86.6538} \\
+m &\approx 1.0213 \\
+b &= \frac{\sum y_i - m \sum x_i}{n} \\
+\sum y_i &= -2.6391-2.7473-4.2485-3.2189-2.4953 \\
+\sum y_i &= -15.3491 \\
+\sum x_i &= -1.7918-1.361-2.1691-2.5257-1.4612 \\
+\sum x_i &= -9.3088 \\
+b &= \frac{-15.3491 - 1.0213(-9.3088)}{5}\\
+b &\approx -1.1685 \\
+y &= 1.0213x - 1.1685
+\end{align*}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[scale=0.25]{example.png}};
+        \begin{scope}[x={(image.south east)},y={(image.north west)}]
+            % Add labels
+            \node at (0.5, -0.05) {X-axis};
+            \node at (-0.05, 0.5) [rotate=90] {Y-axis};
+        \end{scope}
+    \end{tikzpicture}
+    \caption{$P_1$ to $P_5$ plotted, along with the least squares regression line $y = 1.0213x - 1.1685$}
+    \label{fig:6}
+\end{figure}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+
+Obviously, this line is only a good fit for these five points. Using the same approach, the script plots all 528 points and finds the line of best fit for all the points.
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{line2.png}
+    \caption{The least squares regression line through every point $(\ln \frac{L}{K}, \ln \frac{P}{K})$, which is $y = 1.1755x - 1.0643$ }
+    \label{fig:7}
+\end{figure}
+\end{frame}
+\begin{frame}{Finding $\alpha$ and $b$ cont.}
+Since the line of best fit is $y = 1.1755x - 1.0643$, we can compare coefficients with $y = \alpha x + \ln b$ to get the following:
+\begin{align*}
+\alpha &= 1.1755 \\
+\ln b &= -1.0643 \\
+\end{align*}
+Exponentiating both sides to solve for $b$ gives the following:
+\begin{align*}
+e ^ {\ln b} &= e ^ {-1.0643} \\
+b &= e ^ {-1.0643} \\
+b &\approx 0.345
+\end{align*}
+\end{frame}
+
+\begin{frame}{Writing the CDPF and Determining Accuracy}
+Therefore, the CDPF for this data set can be written as $P=0.345L^{1.1755} K^{-0.1755}$. By evaluating each point using the CDPF, then comparing it to each true P value, error can be calculated as the average of the absolute differences between the predicted and actual values. The script calculates the mean absolute error to be 1.77, meaning that on average, the CDPF is off by abount 2 wins. When plotting each point $(x,y)$ where $x$ and $y$ are actual wins and predicted wins respectively, a separate least regression calculation gives us the line of best fit as $y = 1.0361x+0.0975$, as compared to $y = x$, where the CDPF predicted value would be the actual value for every data point. 
+
+
+\end{frame}
+\begin{frame}{\footnotesize Writing the CDPF and Determining Accuracy cont.}
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{error4.png}
+    \caption{\footnotesize A graph of actual vs predicted wins evaluated by the CDPF using each L and K, with the line of best fit being $y = 1.0361x+0.0975$, compared to the line of ideal fit $x = y$.}
+    \label{fig:8}
+\end{figure}
+\end{frame}
+\begin{frame}{Analysis of $\frac{\partial P}{\partial L}, \frac{\partial P}{\partial K},$ and $\nabla P$}
+
+The CDPF for this data set $P=0.345L^{1.1755} K^{-0.1755}$ has two partial derivatives: $\frac{\partial P}{\partial L}$ and $\frac{\partial P}{\partial K}$. $\frac{\partial P}{\partial L}$ represents how the number of wins changes in response to a small change in the number of goals, while keeping the number of shots on goal constant. Conversely, $\frac{\partial P}{\partial K}$ represents how the number of wins changes based on a small change in the number of shots on goal, while keeping goals constant. When evaluated at a point in the domain of $P$, which represents a specific number of goals scored and shots on target for a team, the partial derivatives offer insight on which variable is most impactful towards an increase in wins. Finding the best way to increase wins, however, is done by taking both variables in consideration, which is what $\nabla P$ represents: the direction of the steepest increase of wins. 
+
+
+\end{frame}
+\begin{frame}{Analysis of $\frac{\partial P}{\partial L}, \frac{\partial P}{\partial K},$ and $\nabla P$ cont.}
+A team manager can use this information to prioritize strategies that are most effective in increasing wins. If $\frac{\partial P}{\partial L}$ is evaluated at a point $(L, K)$ where that point represents a team's performance in a game and found to be signficantly larger than $\frac{\partial P}{\partial K}$ at the same point, then the manager might choose to prioritize training towards scoring more goals over shooting at the goal. The same is true for when $\frac{\partial P}{\partial K}$ $>$ $\frac{\partial P}{\partial L}$. This information can be demonstrated by doing an example with one of the teams analyzed earlier. 
+
+\vspace{5mm}
+Hertha BSC Berlin won 3 times, scoring 7 goals and kicking 42 shots towards the goal in the 2008-2009 season. $\frac{\partial P}{\partial L}$ is given by $\frac{\partial }{\partial L}(0.345L^{1.1755} K^{-0.1755})$
+\end{frame}
+\begin{frame}{Analysis of $\frac{\partial P}{\partial L}, \frac{\partial P}{\partial K},$ and $\nabla P$ cont.}
+\begin{itemize}
+    \item Start with the CDPF: \(P = 0.345L^{1.1755}K^{-0.1755}\).
+    \item Calculate \(\frac{\partial P}{\partial L}\):
+    \[
+    \frac{\partial P}{\partial L} = \frac{\partial}{\partial L} 
+    \left( 0.345L^{1.1755} K^{-0.1755} \right) = 0.4055\left(\frac{L}{K}\right)^{0.1755}
+    \]
+    \item {\footnotesize Evaluate at a specific point \((L, K)\) to find the effect of one additional goal on wins.}
+    \item Calculate \(\frac{\partial P}{\partial K}\):
+    \[
+    \frac{\partial P}{\partial K} = \frac{\partial}{\partial K} 
+    \left( 0.345L^{1.1755} K^{-0.1755} \right) = -0.0605\left(\frac{L}{K}\right)^{1.1755} 
+    \]
+    \item {\footnotesize Evaluate at a specific point \((L, K)\) to find the effect of one additional shot on wins.}
+    
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Analysis of $\frac{\partial P}{\partial L}, \frac{\partial P}{\partial K},$ and $\nabla P$ cont.}
+
+Now, we evaluate at the specific point (7,42)
+\begin{align*}
+\frac{\partial P}{\partial L} \bigg|_{(7, 42)} &= 0.4055\left(\frac{7}{42}\right)^{0.1755} \\
+\frac{\partial P}{\partial L} \bigg|_{(7, 42)} &\approx 0.2961
+\end{align*}
+\begin{align*}
+\frac{\partial P}{\partial K} \bigg|_{(7, 42)} &= -0.0605\left(\frac{7}{42}\right)^{1.1755} \\
+\frac{\partial P}{\partial K} \bigg|_{(7, 42)} &\approx -0.0073
+\end{align*}
+\begin{align*}
+\nabla P &= \left( \frac{\partial P}{\partial L}, \frac{\partial P}{\partial K} \right) \\
+\nabla P \bigg|_{(7, 42)} &\approx \left( 0.2961, -0.0073 \right)
+\end{align*}
+
+
+
+
+
+
+
+
+% \begin{align*}
+% \frac{\partial P}{\partial L} &= \frac{\partial }{\partial L}(0.345L^{1.1755} K^{-0.1755}) \\
+% \frac{\partial P}{\partial L} &= 0.4055L^{0.1755}K^{-0.1755}\\
+% \frac{\partial P}{\partial L}|_{(7,42)} &=
+% \end{align*}
+\end{frame}
+
+\begin{frame}{Analysis of $\frac{\partial P}{\partial L}, \frac{\partial P}{\partial K},$ and $\nabla P$ cont.}
+$\frac{\partial P}{\partial L}$ indicates that for each additional goal scored,  the number of wins is expected to increase by approximately 0.297, assuming shots on target remain constant. $\frac{\partial P}{\partial K}$ indicates that an increase in shots on target has a very slight negative effect on wins. This result is intuitive as it aligns with practical observations in football. When the number of shots on target increases while the number of goals remains unchanged, it typically indicates that the team's efficiency in converting shots into goals is low. An increased number of unsuccessful shots not only fails to add to the goal count but also may result in lost possession, thereby potentially benefiting the opposing team. $\nabla P$ combines both values, indicating to the team manager that this specific team should focus more on shot accuracy, rather than shot quantity.
+\end{frame}
+\begin{frame}{Budget Analysis}
+Suppose that a soccer team has a fixed budget of $p$ dollars. Assuming that the training cost of producing L is $n>0$ and the training cost of producing K is $m>0$, then $p = Ln + Km$. Another constraint that is to be noted is that $L \leq K$, since each goal is also a shot on. Lagrange Multipliers can maximize the CDPF $P = 0.345L^{1.1755}K^{-0.1755}$ based on the constraint budget $p$. 
+\end{frame}
+\begin{frame}{Budget Analysis cont.}
+To maximize the CDPF \(P = 0.345L^{1.1755}K^{-0.1755}\) under a budget constraint \(p = Ln + Km\):
+
+\begin{itemize}
+    \item Define the constraint function \(g = Ln + Km - p\).
+    \item Use Lagrange multipliers: \(\nabla P = \lambda \nabla g\).
+    \item Calculate \(\nabla P\):
+    \[
+    \nabla P = \left( 0.4055L^{0.1755}K^{-0.1755}, -0.0605L^{1.1755}K^{-1.1755} \right)
+    \]
+    \item Calculate \(\nabla g\):
+    \[
+    \nabla g = (n, m)
+    \]
+    \item Set up the system of equations:
+    \[
+    \begin{cases}
+    \lambda n = 0.4055L^{0.1755}K^{-0.1755} \\
+    \lambda m = -0.0605L^{1.1755}K^{-1.1755}
+    \end{cases}
+    \]
+    \item Solve for \(\lambda\) and equate the two expressions to find the relationship between \(L\) and \(K\).
+    \item Substitute back into the constraint to find the critical points.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Budget Analysis cont.}
+\begin{align*}
+\lambda n &= 0.4055L^{0.1755}K^{-0.1755} \\
+\lambda m &= -0.0605L^{1.1755}K^{-1.1755}  \\ 
+\lambda &= \frac{0.4055}{n}L^{0.1755}K^{-0.1755} \\
+\frac {0.4055m}{n}L^{0.1755}K^{-0.1755} &= -0.0605L^{1.1755}K^{-1.1755} \\
+\frac {0.4055m}{n} &= \frac{-0.0605L}{K} \\
+\frac {0.4055Km}{n} &= -0.0605L \\
+L &= \frac{-6.7025Km}{n} \\
+p &= Ln + Km \\
+p &= -6.7025Km + Km \\
+\end{align*}
+\end{frame}
+\begin{frame}{Budget Analysis cont.}
+\begin{align*}
+Km &= \frac{p}{-5.7025} \\
+K &= \frac{p}{-5.7025m} \\
+\\
+L &= \frac{-6.7025p}{-5.7025n} = \frac{1.1754p}{n}
+\end{align*}
+From the Lagrange Multiplier, we obtain that a critical point is $(\frac {1.1754p}{n}, \frac{p}{-5.7025m})$. However, since $p, n, m$ are all positive numbers, this means that $\frac {1.1754p}{n} > 0 > \frac{p}{-5.7025m}$, or $L > K$, which is not in the constraint of $L \leq K$. Therefore, this critical point can be discarded, which only leaves the boundary points. Normally, there would be two points that occur when $L$ or $K$ are zero, but since $L$,$K$ $>$ 0 in accordance to the domain of $\ln \frac{L}{K}$ derived earlier, the only boundary point to be considered is when $L = K$. 
+\end{frame}
+\begin{frame}{Budget Analysis cont.}
+When $L = K = \frac{p}{n + m}$, $P = 0.345L = \frac{0.345p}{n + m}$, which is the maximum. This result makes since, as when the budget, $p$, grows larger, the number of wins grows larger. Conversely, as the cost to produce goals and shot ons grows larger, the number of wins grows smaller. 
+
+\vspace{5mm}
+To maximize wins, the team should allocate its budget so that the number of goals equals the number of shots on target because this balance is derived from the Lagrange multiplier method. The critical point analysis shows that \(L = K = \frac{p}{n + m}\) is optimal. This equal allocation ensures the maximum number of wins, as a team will be in a winning advantage if they are scoring in all of its attempts to shoot towards the goal. Of course, scoring in every attempt isn't very realistic for a team manager to consider, so a team manager's best option is to train shot accuracy, to try to score every shot the team takes, also as emphasized by $\nabla P$.
+\end{frame}
+\begin{frame}{Conclusion}
+In conclusion, after extensive analysis, it has been been determined that in terms of shots taken, one should emphasize quality over quantity. By analyzing every team's wins, total goals scored and total shots toward goal attempted, a least squares regression line was able to be calculated, which led to a function $P$, predicting a team's number of wins based on the two variables. From there, two groups of optimization were calculated; one with a set budget, one without; and both led to the same overall conclusion. A potential problem that arises with this model comes from the fact that it only analyzes wins based on two variables; a model with more variables takes into account more factors that lead to the winner of a match, which means it will be more accurate and have less error. Nevertheless, the CDPF was able to predict wins with relatively minimal error.
+\end{frame}
+\end{document}
+
